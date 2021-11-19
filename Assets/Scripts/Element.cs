@@ -6,13 +6,13 @@ public class Element : MonoBehaviour
 {
     //Is a mine?
     public bool mine;
+    public static bool spriteIsMine = false;
     //Row and Column
     public int row;
     public int num;
 
     //Different Textures
     public Sprite[] emptyTextures;
-    public Sprite mineTexture;
 
     // Start is called before the first frame update
     void Start()
@@ -27,10 +27,15 @@ public class Element : MonoBehaviour
 
     public void LoadTexture(int adjacentCount)
     {
-        if (mine)
-            GetComponent<SpriteRenderer>().sprite = emptyTextures[9];
+        SpriteRenderer spr = GetComponent<SpriteRenderer>();
+        if (mine && !spriteIsMine)
+        {
+            spr.sprite = emptyTextures[9];
+            spriteIsMine = true;
+        }
         else
-            GetComponent<SpriteRenderer>().sprite = emptyTextures[adjacentCount];
+            spr.sprite = emptyTextures[adjacentCount];
+        print("Sprite Change");
     }
 
     private void OnMouseUpAsButton()
@@ -45,8 +50,7 @@ public class Element : MonoBehaviour
         else
         {
             //show adjacent mine number
-            LoadTexture(FindObjectOfType<GameManager>().adjacentMines(row, num));
-            Debug.Log("test");
+            LoadTexture(FindObjectOfType<GameManager>().adjacentMines(row - 1, num - 1));
         }
     }
 

@@ -15,20 +15,32 @@ public class GameManager : MonoBehaviour
     public Sprite[] Textures;
     //The Grid itself
     public static int w = 10; //Grid Width
-    public static int h; //Grid Height
+    public static int h = 13; //Grid Height
     public DeclareMultiDimensionalArray[] elements;
 
     public IEnumerator UncoverMines()
     {
         if (!hasLost)
         {
-            Element[] blocks = FindObjectsOfType<Element>();
+            /*Element[] blocks = FindObjectsOfType<Element>();
             for (int i = 0; i < blocks.Length; i++)
             {
                 if (blocks[i].mine)
                 {
                     blocks[i].GetComponent<SpriteRenderer>().sprite = Textures[9];
                     yield return new WaitForSeconds(0.1f);
+                }
+            }*/
+
+            for (int i = 0; i < 10; i++)
+            {
+                for (int j = 0; j < 13; j++)
+                {
+                    if (elements[j].elem[i].mine)
+                    {
+                        elements[j].elem[i].GetComponent<SpriteRenderer>().sprite = Textures[9];
+                        yield return new WaitForSeconds(0.0f);
+                    }
                 }
             }
         }
@@ -39,7 +51,8 @@ public class GameManager : MonoBehaviour
         //Coords in range? Then check for mine.
         if (x >= 0 && y >= 0 && x < w && y < h)
         {
-            FindObjectOfType<GameManager>().elements[x].elem[y].mine = true;
+            print("exists");
+            elements[x].elem[y].mine = true;
             return true;
         }
         return false;
@@ -66,6 +79,7 @@ public class GameManager : MonoBehaviour
         if (MineAt(x-1, y+1))
             ++count; //top-left
 
+        print(count);
         return count;
     }
 }
