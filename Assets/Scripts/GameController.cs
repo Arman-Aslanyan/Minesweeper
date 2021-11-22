@@ -11,6 +11,7 @@ public class GameController : MonoBehaviour
     }*/
 
     public ElemRetry[] elems;
+    public Sprite[] textures;
 
     private void Start()
     {
@@ -52,5 +53,18 @@ public class GameController : MonoBehaviour
         }
 
         return isMine;
+    }
+
+    public IEnumerator RevealMines()
+    {
+        print("You Lose");
+        foreach(ElemRetry elem in elems)
+        {
+            if (elem.mine)
+            {
+                elem.GetComponent<SpriteRenderer>().sprite = textures[9];
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
     }
 }
