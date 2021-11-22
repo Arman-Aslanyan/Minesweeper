@@ -4,57 +4,40 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [System.Serializable]
+    /*[System.Serializable]
     public class DeclareMultiDimensionalArray
     {
         public Element[] elem;
-    }
+    }*/
 
-    private bool hasLost = false;
+    private bool hasFilled = false;
+    public static int num = 0;
 
     public Sprite[] Textures;
     //The Grid itself
     public static int w = 10; //Grid Width
     public static int h = 13; //Grid Height
-    public DeclareMultiDimensionalArray[] elements;
+    public static Element[,] elements = new Element[w, h];
+    //public DeclareMultiDimensionalArray[] elements;
 
     public IEnumerator UncoverMines()
     {
-        if (!hasLost)
+        Element[] elems = FindObjectsOfType<Element>();
+        foreach (Element elem in elems)
         {
-            /*Element[] blocks = FindObjectsOfType<Element>();
-            for (int i = 0; i < blocks.Length; i++)
+            if (elem.mine)
             {
-                if (blocks[i].mine)
-                {
-                    blocks[i].GetComponent<SpriteRenderer>().sprite = Textures[9];
-                    yield return new WaitForSeconds(0.1f);
-                }
-            }*/
-
-            for (int i = 0; i < 10; i++)
-            {
-                for (int j = 0; j < 13; j++)
-                {
-                    if (elements[j].elem[i].mine)
-                    {
-                        elements[j].elem[i].GetComponent<SpriteRenderer>().sprite = Textures[9];
-                        yield return new WaitForSeconds(0.0f);
-                    }
-                }
+                elem.GetComponent<SpriteRenderer>().sprite = Textures[9];
+                yield return new WaitForSeconds(0.1f);
             }
         }
     }
 
     public bool MineAt(int x, int y)
     {
-        //Coords in range? Then check for mine.
+        //Coords in range? Then check for mine
         if (x >= 0 && y >= 0 && x < w && y < h)
-        {
-            print("exists");
-            elements[x].elem[y].mine = true;
-            return true;
-        }
+            return elements[x, y].mine;
         return false;
     }
 
@@ -62,24 +45,54 @@ public class GameManager : MonoBehaviour
     {
         int count = 0;
 
-        if (MineAt(x, y + 1))
-            ++count; //top
-        if (MineAt(x+1, y+1))
-            ++count; //top-right
-        if (MineAt(x + 1, y))
-            ++count; //right
-        if (MineAt(x+1, y-1))
-            ++count; //bottom-right
-        if (MineAt(x, y - 1))
-            ++count; //bottom
-        if (MineAt(x-1, y-1))
-            ++count; //bottom-left
-        if (MineAt(x - 1, y))
-            ++count; //left
-        if (MineAt(x-1, y+1))
-            ++count; //top-left
+        if (MineAt(x, y + 1)) ++count; // top
+        if (MineAt(x + 1, y + 1)) ++count; // top-right
+        if (MineAt(x + 1, y)) ++count; // right
+        if (MineAt(x + 1, y - 1)) ++count; // bottom-right
+        if (MineAt(x, y - 1)) ++count; // bottom
+        if (MineAt(x - 1, y - 1)) ++count; // bottom-left
+        if (MineAt(x - 1, y)) ++count; // left
+        if (MineAt(x - 1, y + 1)) ++count; // top-left
 
-        print(count);
         return count;
+    }
+
+    public bool isFinished()
+    {
+        //Try to find a covered element that isn't a mine
+        foreach (Element elem in elements)
+        {
+            if (elem.IsCovered() && !elem.mine)
+                return false;
+        }
+        //There are non => all are mines => game won.
+        return true;
+    }
+
+    public void FFunCover(int x, int y, bool[,] visited)
+    {
+        //Coords in range?
+        if (x >= 0 && y >= 0 && x < w && y < h)
+        {
+            //visited already?
+            if (visited[x, y])
+                return;
+
+            //uncover element
+            elements[x, y].LoadTexture(FindObjectOfType<GameManager>().adjacentMines(x, y));
+
+            //close to a mine? then no more work needed here
+            if (FindObjectOfType<GameManager>().adjacentMines(x, y) > 0)
+                return;
+
+            //set visited flag
+            visited[x, y] = true;
+
+            //recursion
+            FFunCover(x - 1, y, visited);
+            FFunCover(x + 1, y, visited);
+            FFunCover(x, y - 1, visited);
+            FFunCover(x, y + 1, visited);
+        }
     }
 }

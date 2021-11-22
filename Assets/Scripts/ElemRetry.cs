@@ -16,6 +16,7 @@ public class ElemRetry : MonoBehaviour
 
     private void OnMouseUpAsButton()
     {
+        print("pain");
         if (mine)
             StartCoroutine(GM.RevealMines());
         else

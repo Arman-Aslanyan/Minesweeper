@@ -6,10 +6,9 @@ public class Element : MonoBehaviour
 {
     //Is a mine?
     public bool mine;
-    public static bool spriteIsMine = false;
-    //Row and Column
-    public int row;
-    public int num;
+
+    public int row = 0;
+    public int column = 0;
 
     //Different Textures
     public Sprite[] emptyTextures;
@@ -22,40 +21,46 @@ public class Element : MonoBehaviour
         emptyTextures = FindObjectOfType<GameManager>().Textures;
 
         //Register Grid
-        FindObjectOfType<GameManager>().elements[row - 1].elem[num - 1] = this;
+        gameObject.name += " " + GameManager.num;
+        GameManager.num++;
+        GameManager.elements[column - 1, row - 1] = this;
+
+        //OnMouseUpAsButton();
     }
 
     public void LoadTexture(int adjacentCount)
     {
-        SpriteRenderer spr = GetComponent<SpriteRenderer>();
-        if (mine && !spriteIsMine)
-        {
-            spr.sprite = emptyTextures[9];
-            spriteIsMine = true;
-        }
+        if (mine)
+            GetComponent<SpriteRenderer>().sprite = emptyTextures[9];
         else
-            spr.sprite = emptyTextures[adjacentCount];
-        print("Sprite Change");
+            GetComponent<SpriteRenderer>().sprite = emptyTextures[adjacentCount];
     }
 
     private void OnMouseUpAsButton()
     {
-        //gameObject is a mine
         if (mine)
         {
+            //Uncover mines
             StartCoroutine(FindObjectOfType<GameManager>().UncoverMines());
-            Debug.Log("You Lose");
+
+            print("you lose");
         }
-        //Otherwise is not one
         else
         {
             //show adjacent mine number
-            LoadTexture(FindObjectOfType<GameManager>().adjacentMines(row - 1, num - 1));
+            LoadTexture(FindObjectOfType<GameManager>().adjacentMines(column, row));
+
+            //uncover area without mines
+            FindObjectOfType<GameManager>().FFunCover(column, row, new bool[GameManager.w, GameManager.h]);
+
+            //Check if game finished
+            if (FindObjectOfType<GameManager>().isFinished())
+                print("You Won!!");
         }
     }
 
     public bool IsCovered()
     {
-        return GetComponent<SpriteRenderer>().sprite.name == "Blocks_0";
+        return GetComponent<SpriteRenderer>().sprite = emptyTextures[0];
     }
 }
